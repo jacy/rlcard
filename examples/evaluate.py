@@ -33,9 +33,9 @@ def load_model(model_path, env=None, position=None, device=None):
     return agent
 
 def evaluate(args):
-
+    import torch
     # Check whether gpu is available
-    device = get_device()
+    device = torch.device('cpu')
         
     # Seed numpy, torch, random
     set_seed(args.seed)
