@@ -54,6 +54,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--load_model',
         action='store_true',
+        default = True,
         help='Load an existing model',
     )
     parser.add_argument(
