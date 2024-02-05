@@ -4,7 +4,7 @@ from collections import OrderedDict
 from rlcard.envs import Env
 from rlcard.games.mahjong import Game
 from rlcard.games.mahjong import Card
-from rlcard.games.mahjong.utils import card_encoding_dict, encode_cards, pile2list
+from rlcard.games.mahjong.utils import card_encoding_dict, card_decoding_dict, encode_cards, pile2list
 
 class MahjongEnv(Env):
     ''' Mahjong Environment
@@ -43,9 +43,10 @@ class MahjongEnv(Env):
         rep.extend(piles_rep)
         obs = np.array(rep)
 
-        extracted_state = {'obs': obs, 'legal_actions': self._get_legal_actions()}
+        legal_actions = self._get_legal_actions()
+        extracted_state = {'obs': obs, 'legal_actions': legal_actions}
         extracted_state['raw_obs'] = state
-        extracted_state['raw_legal_actions'] = [a for a in state['action_cards']]
+        extracted_state['raw_legal_actions'] = [card_decoding_dict[a] for a in legal_actions.keys()]
         extracted_state['action_record'] = self.action_recorder
 
         return extracted_state
