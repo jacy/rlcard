@@ -29,3 +29,7 @@ class MahjongCard:
         self.index_num = index_num
         
 
+    def __eq__(self, other):
+        if isinstance(other, MahjongCard):
+            return self.get_str() == other.get_str()
+        return False
