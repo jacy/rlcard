@@ -111,7 +111,8 @@ class MahjongJudger:
             #player_id = players_val.index(max(players_val))
             return False, win_player, players_val
 
-    def judge_hu(self, player):
+    @staticmethod
+    def judge_hu(player):
         ''' Judge whether the player has win the game
         Args:
             player (object): Target player
@@ -136,7 +137,7 @@ class MahjongJudger:
             if count_dict[each] == 2:
                 for _ in range(count_dict[each]):
                     tmp_hand.pop(tmp_hand.index(each))
-                tmp_set_count, _set = self.cal_set(tmp_hand)
+                tmp_set_count, _set = MahjongJudger.cal_set(tmp_hand)
                 used.extend(_set)
                 if tmp_set_count + set_count > maximum:
                     maximum = tmp_set_count + set_count
@@ -162,7 +163,8 @@ class MahjongJudger:
             return True
         return False
 
-    def cal_set(self, cards):
+    @staticmethod
+    def cal_set(cards):
         ''' Calculate the set for given cards
         Args:
             Cards (list): List of cards.
@@ -201,7 +203,7 @@ class MahjongJudger:
                         test_case = [values[index-2], values[index-1], values[index]]
                     else:
                         test_case = [values[index-1], values[index], values[index+1]]
-                    if self.check_consecutive(test_case):
+                    if MahjongJudger.check_consecutive(test_case):
                         set_count += 1
                         for each in test_case:
                             values.pop(values.index(each))
