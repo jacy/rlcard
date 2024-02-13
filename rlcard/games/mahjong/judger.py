@@ -122,23 +122,29 @@ class MahjongJudger:
             Maximum_score (int): Set count score of the player
         '''
         set_count = 0
-        hand = [card.get_str() for card in player.hand]
-        count_dict = {card: hand.count(card) for card in hand}
         set_count = len(player.pile)
         if set_count >= 4:
             return True, set_count
-        used = []
+        hand = [card.get_str() for card in player.hand]
+        need_other_set_count = 4 - set_count
+        need_cards_count = need_other_set_count * 3 + 2
         maximum = 0
+        if(len(hand) != need_cards_count):
+            return False, maximum
+        count_dict = {card: hand.count(card) for card in hand}
+        # used = []
+
         for each in count_dict:
-            if each in used:
-                continue
+            # if each in used:
+            #     continue
             tmp_set_count = 0
             tmp_hand = hand.copy()
-            if count_dict[each] == 2:
-                for _ in range(count_dict[each]):
+            if count_dict[each] >= 2:
+                for _ in range(2):
                     tmp_hand.pop(tmp_hand.index(each))
                 tmp_set_count, _set = MahjongJudger.cal_set(tmp_hand)
-                used.extend(_set)
+                # for x in _set:
+                #     used.extend(x)
                 if tmp_set_count + set_count > maximum:
                     maximum = tmp_set_count + set_count
                 if tmp_set_count + set_count >= 4:
@@ -171,20 +177,11 @@ class MahjongJudger:
 
         Return:
             Set_count (int):
-            Sets (list): List of cards that has been pop from user's hand
+            Sets (list): consecutive cards
         '''
         tmp_cards = cards.copy()
         sets = []
         set_count = 0
-        _dict = {card: tmp_cards.count(card) for card in tmp_cards}
-        # check pong/gang
-        for each in _dict:
-            if _dict[each] == 3 or _dict[each] == 4:
-                set_count += 1
-                for _ in range(_dict[each]):
-                    tmp_cards.pop(tmp_cards.index(each))
-
-        # get all of the traits of each type in hand (except dragons and winds)
         _dict_by_type = defaultdict(list)
         for card in tmp_cards:
             _type = card.split("-")[0]
@@ -195,23 +192,39 @@ class MahjongJudger:
                 _dict_by_type[_type].append(_trait)
         for _type in _dict_by_type.keys():
             values = sorted(_dict_by_type[_type])
-            if len(values) > 2:
-                for index, _ in enumerate(values):
-                    if index == 0:
-                        test_case = [values[index], values[index+1], values[index+2]]
-                    elif index == len(values)-1:
-                        test_case = [values[index-2], values[index-1], values[index]]
-                    else:
-                        test_case = [values[index-1], values[index], values[index+1]]
-                    if MahjongJudger.check_consecutive(test_case):
-                        set_count += 1
-                        for each in test_case:
-                            values.pop(values.index(each))
-                            c = _type+"-"+str(each)
-                            sets.append(c)
-                            if c in tmp_cards:
-                                tmp_cards.pop(tmp_cards.index(c))
+            result,_ = MahjongJudger.get_shun_zi([], values)
+            for shun_zi in result:
+                set_count += 1
+                sets.append(shun_zi)
+                for c in shun_zi:
+                    c = _type+"-"+str(c)
+                    tmp_cards.pop(tmp_cards.index(c))
+
+
+        _dict = {card: tmp_cards.count(card) for card in tmp_cards}
+        # check pong, gang will not be possible for self hand
+        for each in _dict:
+            if _dict[each] >= 3:
+                set_count += 1
+                for _ in range(3):
+                    tmp_cards.pop(tmp_cards.index(each))
         return set_count, sets
+    
+    @staticmethod
+    def get_shun_zi(result, sorted_cards):
+        if len(sorted_cards) < 3:
+            return result,[]
+        first = sorted_cards[0]
+        try:
+            idx_second = sorted_cards.index(chr(ord(first) + 1))
+            idx_third = sorted_cards.index(chr(ord(first) + 2), idx_second + 1)
+            result.append([first, sorted_cards[idx_second], sorted_cards[idx_third]])
+            return MahjongJudger.get_shun_zi(result, sorted_cards[1:idx_second] + sorted_cards[idx_second+1:idx_third] + sorted_cards[idx_third+1:])
+        except ValueError:
+            pass
+        return MahjongJudger.get_shun_zi(result, sorted_cards[1:])
+
+    
 
 #if __name__ == "__main__":
 #    judger = MahjongJudger()
