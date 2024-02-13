@@ -16,7 +16,7 @@ class MahjongEnv(Env):
         super().__init__(config)
         self.action_id = card_encoding_dict
         self.de_action_id = {self.action_id[key]: key for key in self.action_id.keys()}
-        self.state_shape = [[6, 34, 4] for _ in range(self.num_players)]
+        self.state_shape = [[7, 34, 4] for _ in range(self.num_players)]
         self.action_shape = [None for _ in range(self.num_players)]
 
     def _extract_state(self, state):
@@ -39,10 +39,39 @@ class MahjongEnv(Env):
             piles_rep.append(encode_cards(pile2list(players_pile[p])))
         piles_rep = np.array(piles_rep)
         table_rep = encode_cards(state['table'])
-        rep = [hand_rep, table_rep]
+        un_reveal_cards = []
+        un_reveal_cards.extend(self.game.dealer.deck)
+
+        for player in self.game.players:
+            if  player.player_id != self.game.round.current_player:
+                un_reveal_cards.extend(player.hand)
+            # aa = []
+            # aa.extend(player.hand)
+            # aa.sort(key=Card.get_str)
+            # print("p=" + str(player.player_id) + " -> ")
+            # for card in aa:
+            #     print(card.get_str(), end=",")
+            # print('')
+
+        # un_reveal_cards.sort(key=Card.get_str)
+        # print("current player:" + str(self.game.round.current_player))
+        # print("un reveal cards")
+        # for card in un_reveal_cards:
+        #     print(card.get_str(), end=",")
+        # print('================================')
+
+        remain_rep = encode_cards(un_reveal_cards) # cards not yet draw +  cards in other player's hand
+        rep = [hand_rep, table_rep, remain_rep]
+        # rep = [hand_rep, table_rep]
         rep.extend(piles_rep)
         obs = np.array(rep)
-
+        # print('hand_rep')
+        # print(hand_rep.shape)
+        # print('table_rep')
+        # print(table_rep.shape)
+        # print('obs')
+        # print(obs.shape)
+        # print(obs)
         legal_actions = self._get_legal_actions()
         extracted_state = {'obs': obs, 'legal_actions': legal_actions}
         extracted_state['raw_obs'] = state
