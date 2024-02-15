@@ -35,14 +35,27 @@ class MahjongEnv(Env):
         players_pile = state['players_pile']
         hand_rep = encode_cards(state['current_hand'])
         piles_rep = []
+        # print('-----------------------------------------------------------------')
         for p in players_pile.keys():
             piles_rep.append(encode_cards(pile2list(players_pile[p])))
+            # print(f"player={p}, piles:")
+            # for pile in players_pile[p]:
+            #     for c in pile:
+            #         print(c.get_str(), end=",")
+            #     print('')
         piles_rep = np.array(piles_rep)
         table_rep = encode_cards(state['table'])
+       
         un_reveal_cards = []
         un_reveal_cards.extend(self.game.dealer.deck)
 
         for player in self.game.players:
+            # aa = player.hand.copy()
+            # aa.sort(key=Card.get_str)
+            # print("player=" + str(player.player_id) + ", hand -> ", end=",")
+            # for card in aa:
+            #     print(card.get_str(), end=",")
+            # print('')
             if  player.player_id != self.game.round.current_player:
                 un_reveal_cards.extend(player.hand)
             # aa = []
@@ -54,7 +67,12 @@ class MahjongEnv(Env):
             # print('')
 
         # un_reveal_cards.sort(key=Card.get_str)
-        # print("current player:" + str(self.game.round.current_player))
+        # aa = state['table']
+        # print("table -> ", end="")
+        # for card in aa:
+        #     print(card.get_str(), end=",")
+
+        # print("\ncurrent player:" + str(self.game.round.current_player))
         # print("un reveal cards")
         # for card in un_reveal_cards:
         #     print(card.get_str(), end=",")
