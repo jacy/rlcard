@@ -82,9 +82,10 @@ def train(args):
             # Feed transitions into agent memory, and train the agent
             # Here, we assume that DQN always plays the first position
             # and the other players play randomly (if any)
+            print(f'---------------episode={episode} start training-----------------------------')
             for ts in trajectories[0]:
                 agent.feed(ts)
-
+            print(f'---------------episode={episode} end training-----------------------------')
             # Evaluate the performance. Play with random agents.
             if episode % args.evaluate_every == 0:
                 logger.log_performance(

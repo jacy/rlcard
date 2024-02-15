@@ -140,7 +140,7 @@ class DQNAgent(object):
             self.train()
 
     def step(self, state):
-        ''' Predict the action for genrating training data but
+        ''' Predict the action for generating training data but
             have the predictions disconnected from the computation graph
 
         Args:
@@ -221,7 +221,7 @@ class DQNAgent(object):
         state_batch = np.array(state_batch)
 
         loss = self.q_estimator.update(state_batch, action_batch, target_batch)
-        print('\rINFO - Step {}, rl-loss: {}'.format(self.total_t, loss), end='')
+        #print('\rINFO - Step {}, rl-loss: {}'.format(self.total_t, loss), end='')
 
         # Update the target estimator
         if self.train_t % self.update_target_estimator_every == 0:
