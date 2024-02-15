@@ -3,6 +3,7 @@
 '''
 from collections import defaultdict
 import numpy as np
+from rlcard.games.mahjong.card import MahjongCard as Card
 
 class MahjongJudger:
     ''' Determine what cards a player can play
@@ -206,8 +207,23 @@ class MahjongJudger:
         for each in _dict:
             if _dict[each] >= 3:
                 set_count += 1
-                for _ in range(3):
-                    tmp_cards.pop(tmp_cards.index(each))
+                # for _ in range(3):
+                #     tmp_cards.pop(tmp_cards.index(each))
+        return set_count, sets
+    
+    @staticmethod
+    def get_3_cards(cards:Card):
+        hand = [card.get_str() for card in cards]
+        _dict = {card: hand.count(card) for card in hand}
+        set_count = 0
+        sets = []
+        # check pong, gang will not be possible for self hand
+        for each in _dict:
+            if _dict[each] >= 3:
+                set_count += 1
+                _type = each.split("-")[0]
+                _trait = each.split("-")[1]
+                sets.append(Card(_type, _trait))
         return set_count, sets
     
     @staticmethod
