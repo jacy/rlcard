@@ -209,8 +209,12 @@ def tournament(env, num):
     '''
     payoffs = [0 for _ in range(env.num_players)]
     counter = 0
+    tieCount = 0
     while counter < num:
         _, _payoffs = env.run(is_training=False)
+        if set(_payoffs) == set([0,0,0,0]):
+            tieCount += 1
+        print(f'payoff={_payoffs}')
         if isinstance(_payoffs, list):
             for _p in _payoffs:
                 for i, _ in enumerate(payoffs):
@@ -220,6 +224,7 @@ def tournament(env, num):
             for i, _ in enumerate(payoffs):
                 payoffs[i] += _payoffs[i]
             counter += 1
+    print(f'tieCount={tieCount}, tieRate={tieCount*100/num}')
     for i, _ in enumerate(payoffs):
         payoffs[i] /= counter
     return payoffs
