@@ -16,7 +16,13 @@ class MahjongEnv(Env):
         super().__init__(config)
         self.action_id = card_encoding_dict
         self.de_action_id = {self.action_id[key]: key for key in self.action_id.keys()}
-        self.state_shape = [[7, 34, 4] for _ in range(self.num_players)]
+        self.use_un_reval = False
+        if self.use_un_reval:
+            self.state_shape = [[7, 34, 4] for _ in range(self.num_players)]
+        else:
+            self.state_shape = [[6, 34, 4] for _ in range(self.num_players)]
+
+
         self.action_shape = [None for _ in range(self.num_players)]
 
     def _extract_state(self, state):
@@ -35,54 +41,42 @@ class MahjongEnv(Env):
         players_pile = state['players_pile']
         hand_rep = encode_cards(state['current_hand'])
         piles_rep = []
-        # print('-----------------------------------------------------------------')
         for p in players_pile.keys():
             piles_rep.append(encode_cards(pile2list(players_pile[p])))
-            # print(f"player={p}, piles:")
-            # for pile in players_pile[p]:
-            #     for c in pile:
-            #         print(c.get_str(), end=",")
-            #     print('')
         piles_rep = np.array(piles_rep)
         table_rep = encode_cards(state['table'])
        
-        un_reveal_cards = []
-        un_reveal_cards.extend(self.game.dealer.deck)
+        if self.use_un_reval:
+            un_reveal_cards = []
+            un_reveal_cards.extend(self.game.dealer.deck)
 
-        for player in self.game.players:
-            # aa = player.hand.copy()
-            # aa.sort(key=Card.get_str)
-            # print("player=" + str(player.player_id) + ", hand -> ", end=",")
-            # for card in aa:
+            for player in self.game.players:
+                if  player.player_id != self.game.round.current_player:
+                    un_reveal_cards.extend(player.hand)
+                # aa = []
+                # aa.extend(player.hand)
+                # aa.sort(key=Card.get_str)
+                # print("p=" + str(player.player_id) + " -> ")
+                # for card in aa:
+                #     print(card.get_str(), end=",")
+                # print('')
+
+            # un_reveal_cards.sort(key=Card.get_str)
+            # print("un reveal cards")
+            # for card in un_reveal_cards:
             #     print(card.get_str(), end=",")
-            # print('')
-            if  player.player_id != self.game.round.current_player:
-                un_reveal_cards.extend(player.hand)
-            # aa = []
-            # aa.extend(player.hand)
-            # aa.sort(key=Card.get_str)
-            # print("p=" + str(player.player_id) + " -> ")
-            # for card in aa:
-            #     print(card.get_str(), end=",")
-            # print('')
+            # print('================================')
 
-        # un_reveal_cards.sort(key=Card.get_str)
-        # aa = state['table']
-        # print("table -> ", end="")
-        # for card in aa:
-        #     print(card.get_str(), end=",")
-
-        # print("\ncurrent player:" + str(self.game.round.current_player))
-        # print("un reveal cards")
-        # for card in un_reveal_cards:
-        #     print(card.get_str(), end=",")
-        # print('================================')
-
-        remain_rep = encode_cards(un_reveal_cards) # cards not yet draw +  cards in other player's hand
-        rep = [hand_rep, table_rep, remain_rep]
-        # rep = [hand_rep, table_rep]
+            remain_rep = encode_cards(un_reveal_cards) # cards not yet draw +  cards in other player's hand
+            rep = [hand_rep, table_rep, remain_rep]
+        else:
+            rep = [hand_rep, table_rep]
+       
         rep.extend(piles_rep)
         obs = np.array(rep)
+        
+        self.print_state(state)
+        
         # print('hand_rep')
         # print(hand_rep.shape)
         # print('table_rep')
@@ -157,3 +151,28 @@ class MahjongEnv(Env):
             #print(self.game.get_state(self.game.round.current_player))
             #exit()
         return OrderedDict(legal_action_id)
+    
+
+    def print_state(self, state):
+        players_pile = state['players_pile']
+        print('-----------------------------------------------------------------')
+        for p in players_pile.keys():
+            print(f"player={p}, piles:")
+            for pile in players_pile[p]:
+                for c in pile:
+                    print(c.get_str(), end=",")
+                print('')
+       
+        for player in self.game.players:
+            aa = player.hand.copy()
+            aa.sort(key=Card.get_str)
+            print("player=" + str(player.player_id) + ", hand -> ", end=",")
+            for card in aa:
+                print(card.get_str(), end=",")
+            print('')
+        aa = state['table']
+        print("table -> ", end="")
+        for card in aa:
+            print(card.get_str(), end=",")
+
+        print("\ncurrent player:" + str(self.game.round.current_player))
