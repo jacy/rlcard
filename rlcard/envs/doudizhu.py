@@ -20,6 +20,8 @@ class DoudizhuEnv(Env):
         self.name = 'doudizhu'
         self.game = Game()
         super().__init__(config)
+        # landlord has 790 features
+        # the other two players have 901, 901 features
         self.state_shape = [[790], [901], [901]]
         self.action_shape = [[54] for _ in range(self.num_players)]
 
